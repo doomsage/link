@@ -10,8 +10,11 @@ const shortenBtn = document.getElementById("shortenBtn");
 const spinner = shortenBtn.querySelector(".spinner");
 const btnLabel = shortenBtn.querySelector(".btn-label");
 
+<<<<<<< codex/build-full-stack-url-shortener-app-er7cxr
 const API_ORIGIN = window.location.hostname === "link.doomsage.in" ? "" : "https://link.doomsage.in";
 
+=======
+>>>>>>> main
 function toggleLoading(loading) {
   shortenBtn.disabled = loading;
   spinner.classList.toggle("hidden", !loading);
@@ -37,6 +40,7 @@ function showResult(shortUrl) {
   copyState.classList.add("hidden");
 }
 
+<<<<<<< codex/build-full-stack-url-shortener-app-er7cxr
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   const bodyText = await response.text();
@@ -52,6 +56,8 @@ async function parseResponse(response) {
   return { error: bodyText || "Unexpected server response" };
 }
 
+=======
+>>>>>>> main
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
@@ -67,7 +73,11 @@ form.addEventListener("submit", async (event) => {
   toggleLoading(true);
 
   try {
+<<<<<<< codex/build-full-stack-url-shortener-app-er7cxr
     const response = await fetch(`${API_ORIGIN}/api/shorten`, {
+=======
+    const response = await fetch("/api/shorten", {
+>>>>>>> main
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -78,17 +88,28 @@ form.addEventListener("submit", async (event) => {
       })
     });
 
+<<<<<<< codex/build-full-stack-url-shortener-app-er7cxr
     const payload = await parseResponse(response);
 
     if (!response.ok) {
       showError(payload.error || `Request failed (${response.status})`);
+=======
+    const payload = await response.json();
+
+    if (!response.ok) {
+      showError(payload.error || "Failed to create short URL.");
+>>>>>>> main
       return;
     }
 
     showResult(payload.shortUrl);
   } catch (error) {
     console.error(error);
+<<<<<<< codex/build-full-stack-url-shortener-app-er7cxr
     showError("Unable to reach API. If you are not on link.doomsage.in, deploy backend first.");
+=======
+    showError("Network error. Please try again.");
+>>>>>>> main
   } finally {
     toggleLoading(false);
   }
