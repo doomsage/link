@@ -1,0 +1,29 @@
+{
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": {
+          "functionId": "web",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/**",
+        "function": {
+          "functionId": "web",
+          "region": "us-central1"
+        }
+      }
+    ]
+  }
+}
