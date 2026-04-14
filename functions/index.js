@@ -27,6 +27,24 @@ function isValidHttpUrl(value) {
   }
 }
 
+function normalizeHttpUrl(value) {
+  const sanitized = sanitizeInput(value);
+  if (!sanitized) {
+    return "";
+  }
+
+  if (isValidHttpUrl(sanitized)) {
+    return sanitized;
+  }
+
+  const withHttps = `https://${sanitized}`;
+  if (isValidHttpUrl(withHttps)) {
+    return withHttps;
+  }
+
+  return "";
+}
+
 function isValidCustomCode(value) {
   return /^[a-zA-Z0-9]{3,40}$/.test(value);
 }
@@ -61,13 +79,14 @@ async function createUniqueCode() {
 
 app.post("/api/shorten", async (req, res) => {
   const rawUrl = sanitizeInput(req.body?.url);
+  const normalizedUrl = normalizeHttpUrl(rawUrl);
   const rawCustomCode = sanitizeInput(req.body?.customCode);
 
   if (!rawUrl) {
     return res.status(400).json({ error: "URL is required" });
   }
 
-  if (!isValidHttpUrl(rawUrl)) {
+  if (!normalizedUrl) {
     return res.status(400).json({ error: "Invalid URL" });
   }
 
@@ -93,7 +112,7 @@ app.post("/api/shorten", async (req, res) => {
       .doc(code)
       .set({
         code,
-        url: rawUrl
+        url: normalizedUrl
       });
 
     return res.status(201).json({
@@ -104,6 +123,10 @@ app.post("/api/shorten", async (req, res) => {
     console.error("Error creating short link", error);
     return res.status(500).json({ error: "Failed to create short URL" });
   }
+});
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ ok: true, service: "web" });
 });
 
 app.get("/:code", async (req, res, next) => {
