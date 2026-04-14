@@ -1,7 +1,10 @@
-const PRIMARY_API_ORIGIN = window.location.hostname === "link.doomsage.in" ? "" : "https://link.doomsage.in";
-const FALLBACK_API_ORIGINS = [
-  "https://us-central1-link-57c36.cloudfunctions.net/web"
-];
+const SUPABASE_URL = window.SUPABASE_CONFIG?.url || "";
+const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.anonKey || "";
+const APP_ORIGIN = window.location.origin;
+const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const MIN_CODE_LENGTH = 5;
+const MAX_CODE_LENGTH = 7;
+const MAX_GENERATION_RETRIES = 12;
 
 function normalizeHttpUrl(value) {
   const sanitized = value.trim();
@@ -30,67 +33,120 @@ function normalizeHttpUrl(value) {
   return "";
 }
 
-async function parseResponse(response) {
-  const contentType = response.headers.get("content-type") || "";
-  const bodyText = await response.text();
-
-  if (contentType.includes("application/json")) {
-    try {
-      return JSON.parse(bodyText);
-    } catch {
-      return {};
-    }
-  }
-
-  return { error: bodyText || "Unexpected server response" };
+function isValidCustomCode(value) {
+  return /^[a-zA-Z0-9]{3,40}$/.test(value);
 }
 
-function isFirebaseNotFoundError(payload) {
-  if (!payload || typeof payload.error !== "string") {
+function randomCode(length) {
+  let output = "";
+  for (let i = 0; i < length; i += 1) {
+    const idx = Math.floor(Math.random() * CODE_ALPHABET.length);
+    output += CODE_ALPHABET[idx];
+  }
+  return output;
+}
+
+function randomCodeLength() {
+  return MIN_CODE_LENGTH + Math.floor(Math.random() * (MAX_CODE_LENGTH - MIN_CODE_LENGTH + 1));
+}
+
+function getSupabaseClient() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error("Supabase config missing. Set public/config.js with url + anonKey.");
+  }
+
+  if (!window.supabase?.createClient) {
+    throw new Error("Supabase SDK failed to load.");
+  }
+
+  return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  });
+}
+
+function setupNotFoundState(message) {
+  const resultEl = document.getElementById("result");
+  const errorEl = document.getElementById("error");
+  const form = document.getElementById("shortener-form");
+  const subtitle = document.querySelector(".subtitle");
+
+  if (form) {
+    form.classList.add("hidden");
+  }
+
+  if (resultEl) {
+    resultEl.classList.add("hidden");
+  }
+
+  if (subtitle) {
+    subtitle.textContent = "Short link not found.";
+  }
+
+  if (errorEl) {
+    errorEl.textContent = message;
+    errorEl.classList.remove("hidden");
+  }
+}
+
+async function resolveCodeFromPath() {
+  const code = window.location.pathname.replace(/^\/+/, "").trim();
+  if (!code) {
     return false;
   }
 
-  return payload.error.includes("The page could not be found") || payload.error.includes("NOT_FOUND");
+  if (code.includes(".")) {
+    return false;
+  }
+
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("links")
+    .select("url")
+    .eq("code", code)
+    .maybeSingle();
+
+  if (error) {
+    setupNotFoundState("Unable to resolve code right now. Please try again later.");
+    return true;
+  }
+
+  if (!data?.url) {
+    setupNotFoundState("This short code does not exist.");
+    return true;
+  }
+
+  window.location.replace(data.url);
+  return true;
 }
 
-async function requestShortenLink(body) {
-  const apiOrigins = [PRIMARY_API_ORIGIN, ...FALLBACK_API_ORIGINS];
-  let lastPayload = null;
-  let lastStatus = 0;
+async function codeExists(supabase, code) {
+  const { data, error } = await supabase
+    .from("links")
+    .select("code")
+    .eq("code", code)
+    .maybeSingle();
 
-  for (const origin of apiOrigins) {
-    try {
-      const response = await fetch(`${origin}/api/shorten`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-      const payload = await parseResponse(response);
+  if (error) {
+    throw error;
+  }
 
-      if (response.ok) {
-        return { ok: true, payload };
-      }
+  return Boolean(data?.code);
+}
 
-      lastPayload = payload;
-      lastStatus = response.status;
-
-      const shouldTryFallback =
-        response.status === 404 && origin === PRIMARY_API_ORIGIN && isFirebaseNotFoundError(payload);
-
-      if (!shouldTryFallback) {
-        return { ok: false, payload, status: response.status };
-      }
-    } catch (error) {
-      lastPayload = { error: "Unable to reach API. Please check Firebase deployment." };
-      if (origin !== PRIMARY_API_ORIGIN) {
-        return { ok: false, payload: lastPayload, status: 0 };
-      }
+async function createUniqueRandomCode(supabase) {
+  for (let attempt = 0; attempt < MAX_GENERATION_RETRIES; attempt += 1) {
+    const candidate = randomCode(randomCodeLength());
+    const exists = await codeExists(supabase, candidate);
+    if (!exists) {
+      return candidate;
     }
   }
 
-  return { ok: false, payload: lastPayload || { error: "Request failed" }, status: lastStatus };
+  throw new Error("Could not generate a unique code. Please try again.");
 }
 
 function initShortener() {
@@ -153,7 +209,7 @@ function initShortener() {
     clearError();
 
     const rawUrl = urlInput.value.trim();
-    const url = normalizeHttpUrl(rawUrl);
+    const normalizedUrl = normalizeHttpUrl(rawUrl);
     const customCode = customCodeInput.value.trim();
 
     if (!rawUrl) {
@@ -161,41 +217,43 @@ function initShortener() {
       return;
     }
 
-    if (!url) {
+    if (!normalizedUrl) {
       showError("Invalid URL. Example: https://doomsage.in");
+      return;
+    }
+
+    if (customCode && !isValidCustomCode(customCode)) {
+      showError("Custom code must be alphanumeric and 3-40 characters.");
       return;
     }
 
     toggleLoading(true);
 
     try {
-      const requestBody = {
-        url,
-        customCode: customCode || undefined
-      };
+      const supabase = getSupabaseClient();
+      const code = customCode || (await createUniqueRandomCode(supabase));
 
-      const requestResult = await requestShortenLink(requestBody);
+      const { error } = await supabase
+        .from("links")
+        .insert({
+          code,
+          url: normalizedUrl
+        });
 
-      if (!requestResult.ok) {
-        const fallbackHint =
-          requestResult.status === 404 && isFirebaseNotFoundError(requestResult.payload)
-            ? " Firebase Hosting rewrite may be misconfigured."
-            : "";
-        showError(
-          `${requestResult.payload?.error || `Request failed (${requestResult.status})`}${fallbackHint}`
-        );
+      if (error) {
+        if (error.code === "23505") {
+          showError(customCode ? "Code already taken" : "Please retry. Random code collision happened.");
+          return;
+        }
+
+        showError("Failed to create short URL. Please check Supabase setup.");
         return;
       }
 
-      if (!requestResult.payload?.shortUrl) {
-        showError("Short URL was not returned by API. Check Firebase function logs.");
-        return;
-      }
-
-      showResult(requestResult.payload.shortUrl);
+      showResult(`${APP_ORIGIN}/${code}`);
     } catch (error) {
       console.error(error);
-      showError("Unable to reach API. If you are not on link.doomsage.in, deploy backend first.");
+      showError(error.message || "Unable to reach Supabase.");
     } finally {
       toggleLoading(false);
     }
@@ -217,4 +275,17 @@ function initShortener() {
   });
 }
 
-initShortener();
+(async () => {
+  try {
+    const handled = await resolveCodeFromPath();
+    if (handled) {
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+    setupNotFoundState("Supabase is not configured correctly.");
+    return;
+  }
+
+  initShortener();
+})();
