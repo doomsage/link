@@ -5,185 +5,440 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Doomsage Link Shortener</title>
-    
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-    
-    <!-- Tailwind CSS (for rapid UI overhaul) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            },
-            colors: {
-              doomsage: {
-                dark: '#050505',
-                card: '#0c0c0e',
-                cyan: '#00f0ff',
-                purple: '#bd00ff',
-              }
-            }
-          }
-        }
-      }
-    </script>
-
-    <!-- Custom CSS to keep your existing logical classes and add the grid glow -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
-        background-color: #050505;
-        color: #ffffff;
-      }
-      
-      /* JS Target Logic Classes */
-      .hidden { display: none !important; }
-      
-      /* Futuristic Grid Glow Background */
-      .grid-glow {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        background-size: 50px 50px;
-        background-image: 
-          linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
-        mask-image: radial-gradient(ellipse at top, black 20%, transparent 80%);
-        -webkit-mask-image: radial-gradient(ellipse at top, black 20%, transparent 80%);
+      /* --- ULTRA COOL MONSTER UI --- */
+      :root {
+        --bg-color: #050507;
+        --card-bg: rgba(12, 12, 16, 0.65);
+        --primary: #ff1053; /* Doom Red */
+        --primary-glow: rgba(255, 16, 83, 0.5);
+        --secondary: #00f0ff; /* Sage Cyan */
+        --secondary-glow: rgba(0, 240, 255, 0.4);
+        --text-main: #ffffff;
+        --text-muted: #8a8a9e;
+        --border-color: rgba(255, 255, 255, 0.08);
       }
 
-      /* Animated Gradient Border for Card */
-      .card-wrapper {
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      ::selection {
+        background: var(--primary-glow);
+        color: #fff;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-x: hidden;
         position: relative;
       }
-      .card-wrapper::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: 1.1rem;
-        background: linear-gradient(45deg, #00f0ff, #bd00ff, #00f0ff);
+
+      /* Animated 3D Cyber Grid Background */
+      .grid-glow {
+        position: fixed;
+        inset: -50vw;
+        background: 
+          linear-gradient(transparent 95%, rgba(255, 16, 83, 0.15) 100%),
+          linear-gradient(90deg, transparent 95%, rgba(255, 16, 83, 0.15) 100%);
+        background-size: 60px 60px;
         z-index: -1;
-        filter: blur(10px);
-        opacity: 0.3;
-        transition: opacity 0.3s ease;
-      }
-      .card-wrapper:hover::before {
-        opacity: 0.5;
+        transform: perspective(800px) rotateX(60deg) translateY(100px) translateZ(-200px);
+        animation: grid-scroll 8s linear infinite;
+        pointer-events: none;
       }
 
-      /* Custom Spinner for the button */
-      .spinner {
-        border: 3px solid rgba(255, 255, 255, 0.1);
-        border-top-color: #ffffff;
-        border-radius: 50%;
-        width: 1.25rem;
-        height: 1.25rem;
-        animation: spin 1s linear infinite;
-        display: inline-block;
-        margin-left: 0.5rem;
-        vertical-align: middle;
+      .grid-glow::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center, transparent 0%, var(--bg-color) 70%);
       }
-      
-      @keyframes spin { 
-        to { transform: rotate(360deg); } 
+
+      @keyframes grid-scroll {
+        0% { transform: perspective(800px) rotateX(60deg) translateY(0px) translateZ(-200px); }
+        100% { transform: perspective(800px) rotateX(60deg) translateY(60px) translateZ(-200px); }
+      }
+
+      /* Container with ambient glowing orbs */
+      .container {
+        width: 100%;
+        max-width: 580px;
+        padding: 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .container::before, .container::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        z-index: -1;
+        animation: pulse-glow 6s infinite alternate ease-in-out;
+      }
+
+      .container::before {
+        width: 350px; height: 350px;
+        background: var(--primary);
+        top: -100px; left: -100px;
+        opacity: 0.15;
+      }
+
+      .container::after {
+        width: 300px; height: 300px;
+        background: var(--secondary);
+        bottom: -50px; right: -100px;
+        opacity: 0.1;
+        animation-delay: -3s;
+      }
+
+      @keyframes pulse-glow {
+        0% { transform: scale(0.8); opacity: 0.1; }
+        100% { transform: scale(1.1); opacity: 0.25; }
+      }
+
+      /* Glassmorphic Cyber Card */
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 48px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+        box-shadow: 0 0 20px var(--primary-glow);
+      }
+
+      /* Typography */
+      .brand {
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--primary);
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 4px;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        text-shadow: 0 0 15px var(--primary-glow);
+        display: inline-block;
+      }
+
+      h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0b0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+      }
+
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-bottom: 36px;
+        font-weight: 500;
+      }
+
+      /* Forms and Inputs */
+      form { display: flex; flex-direction: column; }
+
+      label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      input {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 18px 20px;
+        color: var(--text-main);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1rem;
+        margin-bottom: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(0, 0, 0, 0.7);
+        box-shadow: 0 0 0 4px rgba(255, 16, 83, 0.15), inset 0 2px 6px rgba(0, 0, 0, 0.5);
+        transform: translateY(-2px);
+      }
+
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Monster Submit Button */
+      button[type="submit"] {
+        background: linear-gradient(135deg, var(--primary) 0%, #b30030 100%);
+        color: white;
+        border: none;
+        padding: 20px;
+        border-radius: 12px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 25px var(--primary-glow);
+        margin-top: 10px;
+      }
+
+      button[type="submit"]:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px var(--primary-glow);
+        background: linear-gradient(135deg, #ff2a6a 0%, #cc0038 100%);
+      }
+
+      button[type="submit"]:active {
+        transform: translateY(1px);
+        box-shadow: 0 5px 15px var(--primary-glow);
+      }
+
+      /* Cyber Glitch Sweep on Hover */
+      button[type="submit"]::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+        transition: all 0.6s ease;
+        transform: skewX(-20deg);
+      }
+
+      button[type="submit"]:hover::before {
+        left: 100%;
+        transition: 0.7s ease;
+      }
+
+      button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      /* State Classes (Logic Dependent) */
+      .hidden { display: none !important; }
+
+      .spinner {
+        width: 22px;
+        height: 22px;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s ease-in-out infinite;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* Error Alert */
+      .error {
+        margin-top: 24px;
+        padding: 16px 20px;
+        background: rgba(255, 16, 83, 0.1);
+        border: 1px solid rgba(255, 16, 83, 0.3);
+        border-left: 4px solid var(--primary);
+        border-radius: 8px;
+        color: #ff4d79;
+        font-size: 0.95rem;
+        font-weight: 500;
+        animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      /* Result Success Box */
+      .result {
+        margin-top: 30px;
+        padding: 24px;
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(0, 240, 255, 0.01));
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        border-radius: 16px;
+        position: relative;
+        animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .result::before {
+        content: '';
+        position: absolute;
+        left: -1px; top: 15%; bottom: 15%; width: 4px;
+        background: var(--secondary);
+        border-radius: 0 4px 4px 0;
+        box-shadow: 0 0 15px var(--secondary);
+      }
+
+      .result > p:first-child {
+        color: var(--secondary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+        font-weight: 700;
+        text-shadow: 0 0 8px var(--secondary-glow);
+      }
+
+      .result-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      #shortUrl {
+        flex: 1;
+        color: #fff;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.15rem;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: all 0.3s ease;
+      }
+
+      #shortUrl:hover {
+        color: var(--secondary);
+        text-shadow: 0 0 12px var(--secondary-glow);
+      }
+
+      #copyBtn {
+        background: rgba(0, 240, 255, 0.1);
+        color: var(--secondary);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+      }
+
+      #copyBtn:hover {
+        background: rgba(0, 240, 255, 0.25);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      .copy-state {
+        color: var(--secondary);
+        font-size: 0.85rem;
+        margin-top: 14px;
+        text-align: right;
+        font-weight: 700;
+        animation: fadeIn 0.3s ease;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 1px;
+      }
+
+      /* Animations */
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-15px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      /* Mobile Adjustments */
+      @media (max-width: 600px) {
+        .card { padding: 32px 24px; }
+        h1 { font-size: 2.2rem; }
+        .result-row { flex-direction: column; align-items: stretch; }
+        #copyBtn { width: 100%; text-align: center; }
       }
     </style>
   </head>
-  <body class="min-h-screen flex items-center justify-center p-4 font-sans selection:bg-doomsage-purple selection:text-white">
-    
-    <!-- Background Effect -->
+  <body>
     <div class="grid-glow" aria-hidden="true"></div>
+    <main class="container">
+      <section class="card">
+        <p class="brand">DOOMSAGE // LINK</p>
+        <h1>Shorten URLs at warp speed.</h1>
+        <p class="subtitle">Secure, clean, and built for fast sharing.</p>
 
-    <main class="container w-full max-w-lg z-10">
-      <section class="card-wrapper">
-        <div class="card bg-doomsage-card border border-white/10 rounded-2xl p-8 md:p-10 shadow-2xl backdrop-blur-xl">
-          
-          <!-- Header section -->
-          <div class="mb-8 text-center">
-            <p class="brand text-doomsage-cyan font-mono text-xs tracking-[0.3em] uppercase mb-3">Doomsage // Link</p>
-            <h1 class="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500">
-              Shorten URLs at warp speed.
-            </h1>
-            <p class="subtitle text-gray-400 text-sm md:text-base">Secure, clean, and built for fast sharing.</p>
+        <form id="shortener-form" novalidate>
+          <label for="url">Paste your long URL</label>
+          <input id="url" name="url" type="url" placeholder="https://example.com/very/long/link" required />
+
+          <label for="customCode">Custom code (optional)</label>
+          <input id="customCode" name="customCode" type="text" placeholder="myCode123" maxlength="40" />
+
+          <button id="shortenBtn" type="submit">
+            <span class="btn-label">Shorten</span>
+            <span class="spinner hidden" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p id="error" class="error hidden" role="alert"></p>
+
+        <article id="result" class="result hidden" aria-live="polite">
+          <p>Short URL ready:</p>
+          <div class="result-row">
+            <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer"></a>
+            <button id="copyBtn" type="button">Copy</button>
           </div>
-
-          <!-- Form -->
-          <form id="shortener-form" class="space-y-6" novalidate>
-            <div class="flex flex-col gap-2">
-              <label for="url" class="text-sm font-medium text-gray-300">Paste your long URL</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 font-mono text-sm">
-                  🔗
-                </div>
-                <input 
-                  id="url" 
-                  name="url" 
-                  type="url" 
-                  placeholder="https://example.com/very/long/link" 
-                  class="w-full bg-black/50 border border-gray-800 text-white placeholder-gray-600 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-doomsage-cyan focus:ring-1 focus:ring-doomsage-cyan transition-all font-mono text-sm shadow-inner"
-                  required 
-                />
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label for="customCode" class="text-sm font-medium text-gray-300">Custom code <span class="text-gray-600 font-normal">(optional)</span></label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 font-mono text-sm">
-                  /
-                </div>
-                <input 
-                  id="customCode" 
-                  name="customCode" 
-                  type="text" 
-                  placeholder="myCode123" 
-                  maxlength="40" 
-                  class="w-full bg-black/50 border border-gray-800 text-white placeholder-gray-600 rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:border-doomsage-purple focus:ring-1 focus:ring-doomsage-purple transition-all font-mono text-sm shadow-inner"
-                />
-              </div>
-            </div>
-
-            <button id="shortenBtn" type="submit" class="w-full group relative flex justify-center items-center py-3.5 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-doomsage-cyan to-doomsage-purple hover:opacity-90 hover:shadow-[0_0_20px_rgba(189,0,255,0.4)] transition-all duration-300 overflow-hidden">
-              <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -translate-x-full z-0"></span>
-              <span class="btn-label relative z-10">Shorten Link</span>
-              <span class="spinner hidden relative z-10" aria-hidden="true"></span>
-            </button>
-          </form>
-
-          <!-- Status & Results -->
-          <p id="error" class="error hidden mt-5 p-3 rounded-lg bg-red-950/50 border border-red-500/30 text-red-400 text-sm font-medium text-center" role="alert"></p>
-
-          <article id="result" class="result hidden mt-6 p-1 rounded-xl bg-gradient-to-r from-doomsage-cyan/30 to-doomsage-purple/30" aria-live="polite">
-            <div class="bg-doomsage-dark rounded-lg p-5">
-              <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">Short URL Ready</p>
-              <div class="result-row flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div class="flex-1 overflow-hidden bg-black/50 rounded-lg border border-gray-800 p-3 flex items-center">
-                  <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer" class="text-doomsage-cyan font-mono text-sm truncate hover:underline hover:text-white transition-colors block w-full"></a>
-                </div>
-                <button id="copyBtn" type="button" class="whitespace-nowrap px-5 py-3 rounded-lg font-mono text-sm font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 transition-colors">
-                  Copy
-                </button>
-              </div>
-              <p id="copyState" class="copy-state hidden mt-2 text-green-400 text-xs font-mono text-right">✓ Copied to clipboard!</p>
-            </div>
-          </article>
-
-        </div>
+          <p id="copyState" class="copy-state hidden">Copied!</p>
+        </article>
       </section>
     </main>
 
-    <!-- Original External Scripts (Logic Untouched) -->
     <script src="/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/app.js" defer></script>
   </body>
 </html>
 
-```
 
-    
