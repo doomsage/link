@@ -1,4 +1,7 @@
-const API_ORIGIN = window.location.hostname === "link.doomsage.in" ? "" : "https://link.doomsage.in";
+const PRIMARY_API_ORIGIN = window.location.hostname === "link.doomsage.in" ? "" : "https://link.doomsage.in";
+const FALLBACK_API_ORIGINS = [
+  "https://us-central1-link-57c36.cloudfunctions.net/web"
+];
 
 function normalizeHttpUrl(value) {
   const sanitized = value.trim();
@@ -40,6 +43,54 @@ async function parseResponse(response) {
   }
 
   return { error: bodyText || "Unexpected server response" };
+}
+
+function isFirebaseNotFoundError(payload) {
+  if (!payload || typeof payload.error !== "string") {
+    return false;
+  }
+
+  return payload.error.includes("The page could not be found") || payload.error.includes("NOT_FOUND");
+}
+
+async function requestShortenLink(body) {
+  const apiOrigins = [PRIMARY_API_ORIGIN, ...FALLBACK_API_ORIGINS];
+  let lastPayload = null;
+  let lastStatus = 0;
+
+  for (const origin of apiOrigins) {
+    try {
+      const response = await fetch(`${origin}/api/shorten`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      const payload = await parseResponse(response);
+
+      if (response.ok) {
+        return { ok: true, payload };
+      }
+
+      lastPayload = payload;
+      lastStatus = response.status;
+
+      const shouldTryFallback =
+        response.status === 404 && origin === PRIMARY_API_ORIGIN && isFirebaseNotFoundError(payload);
+
+      if (!shouldTryFallback) {
+        return { ok: false, payload, status: response.status };
+      }
+    } catch (error) {
+      lastPayload = { error: "Unable to reach API. Please check Firebase deployment." };
+      if (origin !== PRIMARY_API_ORIGIN) {
+        return { ok: false, payload: lastPayload, status: 0 };
+      }
+    }
+  }
+
+  return { ok: false, payload: lastPayload || { error: "Request failed" }, status: lastStatus };
 }
 
 function initShortener() {
@@ -118,25 +169,30 @@ function initShortener() {
     toggleLoading(true);
 
     try {
-      const response = await fetch(`${API_ORIGIN}/api/shorten`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          url,
-          customCode: customCode || undefined
-        })
-      });
+      const requestBody = {
+        url,
+        customCode: customCode || undefined
+      };
 
-      const payload = await parseResponse(response);
+      const requestResult = await requestShortenLink(requestBody);
 
-      if (!response.ok) {
-        showError(payload.error || `Request failed (${response.status})`);
+      if (!requestResult.ok) {
+        const fallbackHint =
+          requestResult.status === 404 && isFirebaseNotFoundError(requestResult.payload)
+            ? " Firebase Hosting rewrite may be misconfigured."
+            : "";
+        showError(
+          `${requestResult.payload?.error || `Request failed (${requestResult.status})`}${fallbackHint}`
+        );
         return;
       }
 
-      showResult(payload.shortUrl);
+      if (!requestResult.payload?.shortUrl) {
+        showError("Short URL was not returned by API. Check Firebase function logs.");
+        return;
+      }
+
+      showResult(requestResult.payload.shortUrl);
     } catch (error) {
       console.error(error);
       showError("Unable to reach API. If you are not on link.doomsage.in, deploy backend first.");
