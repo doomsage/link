@@ -193,7 +193,7 @@
             Custom code <span class="text-slate-500 text-xs font-mono">Optional</span>
           </label>
           <div class="relative flex items-center">
-            <span class="absolute left-3 text-slate-500 font-mono text-sm">ds.link/</span>
+            <span class="absolute left-3 text-slate-500 font-mono text-sm"></span>
             <input id="customCode" name="customCode" type="text" placeholder="myCode123" maxlength="40" 
               class="cool-input font-mono w-full pl-[72px] pr-4 py-3 rounded-xl text-slate-100 placeholder-slate-600 focus:ring-0" />
           </div>
@@ -216,7 +216,7 @@
         <div class="flex items-center gap-3 bg-black/40 border border-purple-500/30 rounded-xl p-2 pl-4">
           <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer" 
             class="font-mono text-cyan-400 truncate flex-1 hover:text-cyan-300 transition-colors">
-            https://ds.link/warp
+            https://link.doomsage.in/warp
           </a>
           
           <button id="copyBtn" type="button" 
@@ -269,7 +269,7 @@
         
         // Generate Fake Link
         const code = document.getElementById('customCode').value || Math.random().toString(36).substring(2, 7);
-        const generatedLink = `https://ds.link/${code}`;
+        const generatedLink = `https://link.doomsage.in/${code}`;
         
         shortUrlEl.href = generatedLink;
         shortUrlEl.textContent = generatedLink;
