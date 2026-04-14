@@ -1,335 +1,183 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Doomsage Link Shortener</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS (for rapid UI overhaul) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              doomsage: {
+                dark: '#050505',
+                card: '#0c0c0e',
+                cyan: '#00f0ff',
+                purple: '#bd00ff',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Custom CSS to keep your existing logical classes and add the grid glow -->
     <style>
-      :root {
-        --bg-color: #050508;
-        --card-bg: rgba(15, 15, 20, 0.75);
-        --text-main: #f0f0f5;
-        --text-muted: #8a8a9e;
-        --neon-cyan: #00f0ff;
-        --neon-purple: #7000ff;
-        --error-color: #ff3366;
-        --border-color: rgba(255, 255, 255, 0.1);
-      }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
       body {
-        background-color: var(--bg-color);
-        color: var(--text-main);
-        font-family: 'Inter', sans-serif;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow-x: hidden;
+        background-color: #050505;
+        color: #ffffff;
       }
-
-      /* Animated Warp Grid Background */
+      
+      /* JS Target Logic Classes */
+      .hidden { display: none !important; }
+      
+      /* Futuristic Grid Glow Background */
       .grid-glow {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-image: 
-          linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
-        z-index: -1;
-        pointer-events: none;
-      }
-
-      .grid-glow::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 80vw;
-        height: 80vw;
-        transform: translate(-50%, -50%);
-        background: radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 60%);
-        filter: blur(60px);
-      }
-
-      .grid-glow::after {
-        content: '';
-        position: absolute;
         inset: 0;
-        background: radial-gradient(circle at center, transparent 0%, var(--bg-color) 80%);
+        z-index: -1;
+        background-size: 50px 50px;
+        background-image: 
+          linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+        mask-image: radial-gradient(ellipse at top, black 20%, transparent 80%);
+        -webkit-mask-image: radial-gradient(ellipse at top, black 20%, transparent 80%);
       }
 
-      /* Layout */
-      .container {
-        width: 100%;
-        max-width: 540px;
-        padding: 20px;
+      /* Animated Gradient Border for Card */
+      .card-wrapper {
         position: relative;
-        z-index: 1;
+      }
+      .card-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 1.1rem;
+        background: linear-gradient(45deg, #00f0ff, #bd00ff, #00f0ff);
+        z-index: -1;
+        filter: blur(10px);
+        opacity: 0.3;
+        transition: opacity 0.3s ease;
+      }
+      .card-wrapper:hover::before {
+        opacity: 0.5;
       }
 
-      /* Glassmorphism Card */
-      .card {
-        background: var(--card-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--border-color);
-        border-radius: 24px;
-        padding: 40px;
-        box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02);
-      }
-
-      /* Typography */
-      .brand {
-        font-family: 'JetBrains Mono', monospace;
-        color: var(--neon-cyan);
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        margin-bottom: 12px;
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-      }
-
-      h1 {
-        font-size: 2.2rem;
-        font-weight: 800;
-        line-height: 1.2;
-        margin-bottom: 10px;
-        background: linear-gradient(to right, #fff, #a0a0b8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .subtitle {
-        color: var(--text-muted);
-        font-size: 1rem;
-        margin-bottom: 32px;
-      }
-
-      /* Form Elements */
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      label {
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: -12px;
-      }
-
-      input {
-        width: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 16px;
-        color: var(--text-main);
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        outline: none;
-      }
-
-      input::placeholder {
-        color: rgba(255, 255, 255, 0.2);
-      }
-
-      input:focus {
-        border-color: var(--neon-cyan);
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-        background: rgba(0, 0, 0, 0.6);
-      }
-
-      /* Buttons */
-      button {
-        cursor: pointer;
-        font-family: 'Inter', sans-serif;
-        font-weight: 700;
-        border: none;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-      }
-
-      #shortenBtn {
-        margin-top: 10px;
-        background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-        color: #fff;
-        padding: 16px;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 20px rgba(112, 0, 255, 0.3);
-      }
-
-      #shortenBtn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(0, 240, 255, 0.4);
-      }
-
-      #shortenBtn:active {
-        transform: translateY(0);
-      }
-
-      /* Spinner Animation */
+      /* Custom Spinner for the button */
       .spinner {
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: #fff;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #ffffff;
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        width: 1.25rem;
+        height: 1.25rem;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-left: 0.5rem;
+        vertical-align: middle;
       }
-
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-
-      /* Utility Classes */
-      .hidden {
-        display: none !important;
-      }
-
-      /* Error Messages */
-      .error {
-        margin-top: 20px;
-        padding: 12px 16px;
-        background: rgba(255, 51, 102, 0.1);
-        border-left: 4px solid var(--error-color);
-        color: var(--error-color);
-        border-radius: 4px;
-        font-size: 0.9rem;
-        font-weight: 500;
-      }
-
-      /* Results Area */
-      .result {
-        margin-top: 30px;
-        padding-top: 30px;
-        border-top: 1px solid var(--border-color);
-        animation: fadeIn 0.4s ease forwards;
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      .result > p:first-child {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-      }
-
-      .result-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 12px 16px;
-        border-radius: 12px;
-        border: 1px solid rgba(0, 240, 255, 0.2);
-      }
-
-      #shortUrl {
-        flex-grow: 1;
-        color: var(--neon-cyan);
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.05rem;
-        text-decoration: none;
-        word-break: break-all;
-        text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
-      }
-
-      #shortUrl:hover {
-        text-decoration: underline;
-      }
-
-      #copyBtn {
-        background: transparent;
-        color: var(--text-main);
-        border: 1px solid var(--border-color);
-        padding: 8px 16px;
-        font-size: 0.9rem;
-      }
-
-      #copyBtn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: var(--text-main);
-      }
-
-      .copy-state {
-        margin-top: 12px;
-        color: #00ff9d;
-        font-size: 0.85rem;
-        font-weight: 500;
-        text-align: right;
-      }
-
-      /* Responsive adjustments */
-      @media (max-width: 480px) {
-        .card { padding: 24px; }
-        h1 { font-size: 1.8rem; }
-        .result-row { flex-direction: column; align-items: stretch; }
-        #copyBtn { padding: 12px; }
+      
+      @keyframes spin { 
+        to { transform: rotate(360deg); } 
       }
     </style>
   </head>
-  <body>
+  <body class="min-h-screen flex items-center justify-center p-4 font-sans selection:bg-doomsage-purple selection:text-white">
+    
+    <!-- Background Effect -->
     <div class="grid-glow" aria-hidden="true"></div>
-    <main class="container">
-      <section class="card">
-        <p class="brand">DOOMSAGE // LINK</p>
-        <h1>Shorten URLs at warp speed.</h1>
-        <p class="subtitle">Secure, clean, and built for fast sharing.</p>
 
-        <form id="shortener-form" novalidate>
-          <label for="url">Paste your long URL</label>
-          <input id="url" name="url" type="url" placeholder="https://example.com/very/long/link" required />
-
-          <label for="customCode">Custom code (optional)</label>
-          <input id="customCode" name="customCode" type="text" placeholder="myCode123" maxlength="40" />
-
-          <button id="shortenBtn" type="submit">
-            <span class="btn-label">Shorten</span>
-            <span class="spinner hidden" aria-hidden="true"></span>
-          </button>
-        </form>
-
-        <p id="error" class="error hidden" role="alert"></p>
-
-        <article id="result" class="result hidden" aria-live="polite">
-          <p>Short URL ready:</p>
-          <div class="result-row">
-            <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer"></a>
-            <button id="copyBtn" type="button">Copy</button>
+    <main class="container w-full max-w-lg z-10">
+      <section class="card-wrapper">
+        <div class="card bg-doomsage-card border border-white/10 rounded-2xl p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+          
+          <!-- Header section -->
+          <div class="mb-8 text-center">
+            <p class="brand text-doomsage-cyan font-mono text-xs tracking-[0.3em] uppercase mb-3">Doomsage // Link</p>
+            <h1 class="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500">
+              Shorten URLs at warp speed.
+            </h1>
+            <p class="subtitle text-gray-400 text-sm md:text-base">Secure, clean, and built for fast sharing.</p>
           </div>
-          <p id="copyState" class="copy-state hidden">Copied!</p>
-        </article>
+
+          <!-- Form -->
+          <form id="shortener-form" class="space-y-6" novalidate>
+            <div class="flex flex-col gap-2">
+              <label for="url" class="text-sm font-medium text-gray-300">Paste your long URL</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 font-mono text-sm">
+                  🔗
+                </div>
+                <input 
+                  id="url" 
+                  name="url" 
+                  type="url" 
+                  placeholder="https://example.com/very/long/link" 
+                  class="w-full bg-black/50 border border-gray-800 text-white placeholder-gray-600 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-doomsage-cyan focus:ring-1 focus:ring-doomsage-cyan transition-all font-mono text-sm shadow-inner"
+                  required 
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="customCode" class="text-sm font-medium text-gray-300">Custom code <span class="text-gray-600 font-normal">(optional)</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 font-mono text-sm">
+                  /
+                </div>
+                <input 
+                  id="customCode" 
+                  name="customCode" 
+                  type="text" 
+                  placeholder="myCode123" 
+                  maxlength="40" 
+                  class="w-full bg-black/50 border border-gray-800 text-white placeholder-gray-600 rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:border-doomsage-purple focus:ring-1 focus:ring-doomsage-purple transition-all font-mono text-sm shadow-inner"
+                />
+              </div>
+            </div>
+
+            <button id="shortenBtn" type="submit" class="w-full group relative flex justify-center items-center py-3.5 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-doomsage-cyan to-doomsage-purple hover:opacity-90 hover:shadow-[0_0_20px_rgba(189,0,255,0.4)] transition-all duration-300 overflow-hidden">
+              <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -translate-x-full z-0"></span>
+              <span class="btn-label relative z-10">Shorten Link</span>
+              <span class="spinner hidden relative z-10" aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <!-- Status & Results -->
+          <p id="error" class="error hidden mt-5 p-3 rounded-lg bg-red-950/50 border border-red-500/30 text-red-400 text-sm font-medium text-center" role="alert"></p>
+
+          <article id="result" class="result hidden mt-6 p-1 rounded-xl bg-gradient-to-r from-doomsage-cyan/30 to-doomsage-purple/30" aria-live="polite">
+            <div class="bg-doomsage-dark rounded-lg p-5">
+              <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">Short URL Ready</p>
+              <div class="result-row flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="flex-1 overflow-hidden bg-black/50 rounded-lg border border-gray-800 p-3 flex items-center">
+                  <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer" class="text-doomsage-cyan font-mono text-sm truncate hover:underline hover:text-white transition-colors block w-full"></a>
+                </div>
+                <button id="copyBtn" type="button" class="whitespace-nowrap px-5 py-3 rounded-lg font-mono text-sm font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 transition-colors">
+                  Copy
+                </button>
+              </div>
+              <p id="copyState" class="copy-state hidden mt-2 text-green-400 text-xs font-mono text-right">✓ Copied to clipboard!</p>
+            </div>
+          </article>
+
+        </div>
       </section>
     </main>
 
+    <!-- Original External Scripts (Logic Untouched) -->
     <script src="/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/app.js" defer></script>
@@ -337,4 +185,5 @@
 </html>
 
 ```
+
     
