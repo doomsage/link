@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doomsage Link Shortener</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="grid-glow" aria-hidden="true"></div>
+    <main class="container">
+      <section class="card">
+        <p class="brand">DOOMSAGE // LINK</p>
+        <h1>Shorten URLs at warp speed.</h1>
+        <p class="subtitle">Secure, clean, and built for fast sharing.</p>
+
+        <form id="shortener-form" novalidate>
+          <label for="url">Paste your long URL</label>
+          <input id="url" name="url" type="url" placeholder="https://example.com/very/long/link" required />
+
+          <label for="customCode">Custom code (optional)</label>
+          <input id="customCode" name="customCode" type="text" placeholder="myCode123" maxlength="40" />
+
+          <button id="shortenBtn" type="submit">
+            <span class="btn-label">Shorten</span>
+            <span class="spinner hidden" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p id="error" class="error hidden" role="alert"></p>
+
+        <article id="result" class="result hidden" aria-live="polite">
+          <p>Short URL ready:</p>
+          <div class="result-row">
+            <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer"></a>
+            <button id="copyBtn" type="button">Copy</button>
+          </div>
+          <p id="copyState" class="copy-state hidden">Copied!</p>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="/firebase-init.js"></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
