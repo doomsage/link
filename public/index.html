@@ -8,19 +8,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap"
       rel="stylesheet"
     />
     <style>
-      /* --- ULTIMATE DANGEROUS MONSTER FANTASY UI --- */
+      /* --- CYBERPUNK HACKER TERMINAL UI --- */
       :root {
-        --void-black: #030005;
-        --hellfire: #ff1e00;
-        --blood-red: #8b0000;
-        --demon-purple: #4a00e0;
-        --magic-cyan: #00fff2;
-        --toxic-green: #39ff14;
-        --artifact-bg: rgba(10, 2, 5, 0.85);
+        --bg: #030405;
+        --neon-cyan: #00f3ff;
+        --neon-pink: #ff0055;
+        --danger-red: #ff1e1e;
+        --dark-panel: rgba(10, 15, 20, 0.85);
+        --grid-color: rgba(0, 243, 255, 0.1);
+        --font-main: 'Rajdhani', sans-serif;
+        --font-code: 'Share Tech Mono', monospace;
       }
 
       * {
@@ -30,470 +31,416 @@
       }
 
       ::selection {
-        background: var(--hellfire);
-        color: #fff;
-        text-shadow: 0 0 10px #fff;
+        background: var(--neon-cyan);
+        color: #000;
       }
 
       body {
-        background-color: var(--void-black);
-        color: #fff;
-        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--neon-cyan);
+        font-family: var(--font-main);
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        overflow-x: hidden;
+        overflow: hidden;
         position: relative;
-        /* The Abyss Background */
         background-image: 
-          radial-gradient(circle at 15% 50%, rgba(139, 0, 0, 0.15), transparent 50%),
-          radial-gradient(circle at 85% 30%, rgba(74, 0, 224, 0.15), transparent 50%);
-        animation: breathe-abyss 10s infinite alternate ease-in-out;
+          linear-gradient(var(--grid-color) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: center center;
       }
 
-      @keyframes breathe-abyss {
-        0% { filter: brightness(0.8) contrast(1.2); }
-        100% { filter: brightness(1.2) contrast(1.5); }
-      }
-
-      /* Floating Magical Embers */
-      .grid-glow {
-        position: fixed;
-        top: 0; left: 0; width: 100vw; height: 100vh;
+      /* Animated Radar/Grid Background */
+      body::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 200%; height: 200%;
+        background: radial-gradient(circle at center, transparent 30%, var(--bg) 80%);
         z-index: 0;
+      }
+
+      /* HUD Decorative Elements */
+      .hud-decor {
+        position: absolute;
+        font-family: var(--font-code);
+        font-size: 0.75rem;
+        color: rgba(0, 243, 255, 0.4);
         pointer-events: none;
-        background: transparent;
+        z-index: 1;
+        letter-spacing: 2px;
+      }
+
+      .hud-top-left { top: 30px; left: 30px; border-left: 2px solid var(--neon-pink); padding-left: 10px; }
+      .hud-bottom-right { bottom: 30px; right: 30px; text-align: right; border-right: 2px solid var(--neon-cyan); padding-right: 10px; }
+      
+      /* Main Terminal Container */
+      .terminal-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 650px;
+        z-index: 10;
+        padding: 3px;
+        /* Glowing Gradient Border */
+        background: linear-gradient(45deg, var(--neon-cyan), transparent 40%, transparent 60%, var(--neon-pink));
+        clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+        animation: border-pulse 4s infinite alternate;
+      }
+
+      @keyframes border-pulse {
+        0% { filter: drop-shadow(0 0 10px var(--neon-cyan)); }
+        100% { filter: drop-shadow(0 0 25px var(--neon-pink)); }
+      }
+
+      .terminal-core {
+        background: var(--dark-panel);
+        backdrop-filter: blur(10px);
+        clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+        padding: 40px;
+        position: relative;
         overflow: hidden;
       }
 
-      .grid-glow::before, .grid-glow::after {
-        content: '';
+      /* Holographic Scanning Line */
+      .scanner-line {
         position: absolute;
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        box-shadow: 
-          10vw 110vh 2px 1px #ff1e00, 25vw 120vh 3px 2px #ff6600, 
-          40vw 105vh 1px 1px #4a00e0, 60vw 115vh 4px 1px #ff1e00, 
-          80vw 108vh 2px 2px #8b0000, 90vw 125vh 1px 1px #ff6600,
-          15vw 130vh 3px 1px #4a00e0, 50vw 140vh 2px 2px #ff1e00,
-          75vw 110vh 3px 1px #ff6600, 95vw 115vh 1px 1px #8b0000;
-        animation: float-embers 15s linear infinite;
-        filter: blur(1px);
+        top: 0; left: 0; width: 100%; height: 5px;
+        background: var(--neon-cyan);
+        box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+        opacity: 0.5;
+        animation: scan 3s linear infinite;
+        pointer-events: none;
       }
 
-      .grid-glow::after {
-        box-shadow: 
-          5vw 115vh 2px 1px #4a00e0, 35vw 110vh 3px 2px #ff1e00, 
-          55vw 125vh 1px 1px #ff6600, 70vw 105vh 4px 1px #4a00e0, 
-          85vw 135vh 2px 2px #ff1e00, 10vw 145vh 1px 1px #8b0000;
-        animation: float-embers 20s linear infinite;
-        animation-delay: -7s;
+      @keyframes scan {
+        0% { top: -10%; opacity: 0; }
+        10% { opacity: 0.5; }
+        90% { opacity: 0.5; }
+        100% { top: 110%; opacity: 0; }
       }
 
-      @keyframes float-embers {
-        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { transform: translateY(-120vh) scale(2) rotate(360deg); opacity: 0; }
+      /* Header & Title */
+      .sys-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        padding-bottom: 15px;
+        margin-bottom: 30px;
       }
 
-      /* The Obsidian Artifact (Container) */
-      .container {
-        width: 100%;
-        max-width: 600px;
-        padding: 20px;
-        position: relative;
-        z-index: 10;
-      }
-
-      /* Dark Magic Aura Behind Card */
-      .container::before {
-        content: '';
-        position: absolute;
-        top: -10%; left: -10%; right: -10%; bottom: -10%;
-        background: conic-gradient(from 0deg, transparent, var(--hellfire), var(--demon-purple), transparent);
-        filter: blur(60px);
-        opacity: 0.4;
-        z-index: -1;
-        animation: spin-aura 8s linear infinite;
-        border-radius: 50%;
-      }
-
-      @keyframes spin-aura {
-        100% { transform: rotate(360deg); }
-      }
-
-      .card {
-        background: var(--artifact-bg);
-        border: 2px solid #2a0008;
-        border-top-color: #ff1e00;
-        border-bottom-color: #4a00e0;
-        border-radius: 12px;
-        padding: 50px 40px;
-        box-shadow: 
-          0 0 40px rgba(255, 30, 0, 0.2),
-          inset 0 0 30px rgba(0, 0, 0, 0.9),
-          inset 0 2px 0 rgba(255, 30, 0, 0.5);
-        position: relative;
-        backdrop-filter: blur(10px);
-        transform-style: preserve-3d;
-        animation: artifact-hover 4s ease-in-out infinite alternate;
-      }
-
-      @keyframes artifact-hover {
-        0% { transform: translateY(0px) rotateX(2deg); box-shadow: 0 10px 40px rgba(255, 30, 0, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.9); }
-        100% { transform: translateY(-10px) rotateX(-2deg); box-shadow: 0 30px 60px rgba(255, 30, 0, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.9); }
-      }
-
-      /* Typography */
       .brand {
-        font-family: 'JetBrains Mono', monospace;
-        color: var(--hellfire);
-        font-size: 1rem;
-        font-weight: 800;
-        letter-spacing: 8px;
-        margin-bottom: 20px;
-        text-transform: uppercase;
-        text-shadow: 0 0 10px var(--hellfire), 0 0 20px var(--blood-red);
-        animation: flicker 3s infinite;
+        font-family: var(--font-code);
+        color: var(--neon-pink);
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-shadow: 0 0 10px var(--neon-pink);
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
-      @keyframes flicker {
-        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; text-shadow: 0 0 10px var(--hellfire); }
-        20%, 24%, 55% { opacity: 0.4; text-shadow: none; }
+      .brand::before {
+        content: '';
+        display: inline-block;
+        width: 12px; height: 12px;
+        background: var(--neon-pink);
+        box-shadow: 0 0 10px var(--neon-pink);
+        animation: blink 1s infinite;
       }
+
+      @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
       h1 {
-        font-size: 3.5rem;
-        font-weight: 900;
-        margin-bottom: 10px;
-        line-height: 1.05;
-        background: linear-gradient(180deg, #ffffff 0%, #ff8c00 50%, #ff1e00 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 2.8rem;
+        color: #fff;
         text-transform: uppercase;
-        letter-spacing: -2px;
-        filter: drop-shadow(0 0 8px rgba(255, 30, 0, 0.4));
+        letter-spacing: 2px;
+        line-height: 1.1;
+        text-shadow: 2px 2px 0px var(--neon-pink), -2px -2px 0px var(--neon-cyan);
+        position: relative;
+        display: inline-block;
+      }
+
+      /* Glitch Effect on Title Hover */
+      h1:hover { animation: text-glitch 0.2s infinite; }
+
+      @keyframes text-glitch {
+        0% { transform: translate(0); text-shadow: 2px 2px 0px var(--neon-pink), -2px -2px 0px var(--neon-cyan); }
+        25% { transform: translate(-2px, 2px); text-shadow: -2px -2px 0px var(--neon-pink), 2px 2px 0px var(--neon-cyan); }
+        50% { transform: translate(2px, -2px); text-shadow: 2px -2px 0px var(--neon-pink), -2px 2px 0px var(--neon-cyan); }
+        75% { transform: translate(-2px, -2px); }
+        100% { transform: translate(0); }
       }
 
       .subtitle {
-        color: #a38c92;
-        font-size: 1.1rem;
-        margin-bottom: 40px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-shadow: 0 2px 4px #000;
+        font-family: var(--font-code);
+        color: #8fa3b0;
+        margin-top: 10px;
+        font-size: 0.9rem;
       }
 
       /* Forms and Inputs */
-      form { display: flex; flex-direction: column; }
+      form { display: flex; flex-direction: column; position: relative; z-index: 2; }
+
+      .input-group {
+        position: relative;
+        margin-bottom: 30px;
+      }
 
       label {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.8rem;
+        font-family: var(--font-code);
+        font-size: 0.85rem;
+        color: var(--neon-cyan);
         text-transform: uppercase;
-        letter-spacing: 3px;
-        color: #ff5e5e;
-        margin-bottom: 12px;
-        font-weight: 800;
-        text-shadow: 0 0 5px rgba(255, 30, 0, 0.5);
+        letter-spacing: 1px;
+        display: block;
+        margin-bottom: 8px;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
       }
 
       input {
-        background: #050002;
-        border: 2px solid #3a0005;
-        border-radius: 4px;
-        padding: 20px;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        border-left: 4px solid var(--neon-cyan);
+        padding: 16px 20px;
         color: #fff;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--font-code);
         font-size: 1.1rem;
-        margin-bottom: 30px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.8);
+        outline: none;
+        transition: all 0.3s;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
       }
 
       input:focus {
-        outline: none;
-        border-color: var(--hellfire);
-        background: #0d0004;
-        box-shadow: 0 0 20px rgba(255, 30, 0, 0.3), inset 0 0 10px rgba(255, 30, 0, 0.2);
-        animation: pulse-border 1.5s infinite alternate;
+        border-color: var(--neon-pink);
+        border-left-color: var(--neon-pink);
+        box-shadow: 0 0 15px rgba(255, 0, 85, 0.3), inset 0 0 10px rgba(255, 0, 85, 0.1);
+        background: rgba(20, 5, 10, 0.8);
       }
 
-      input::placeholder {
-        color: #4a252b;
-        font-style: italic;
-      }
+      input::placeholder { color: rgba(255, 255, 255, 0.2); }
 
-      @keyframes pulse-border {
-        0% { border-color: var(--hellfire); box-shadow: 0 0 15px rgba(255, 30, 0, 0.2); }
-        100% { border-color: #ff6600; box-shadow: 0 0 30px rgba(255, 102, 0, 0.6); }
-      }
-
-      /* THE MONSTER BUTTON */
+      /* Core Reactor Button */
       button[type="submit"] {
-        background: linear-gradient(45deg, var(--blood-red), var(--hellfire), var(--demon-purple), var(--blood-red));
-        background-size: 300% 300%;
-        color: white;
-        border: 2px solid #ff1e00;
-        padding: 22px;
-        border-radius: 4px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 900;
-        font-size: 1.3rem;
+        background: transparent;
+        color: var(--neon-cyan);
+        border: 2px solid var(--neon-cyan);
+        padding: 18px;
+        font-family: var(--font-main);
+        font-weight: 700;
+        font-size: 1.4rem;
         text-transform: uppercase;
         letter-spacing: 4px;
         cursor: pointer;
         position: relative;
         overflow: hidden;
+        transition: all 0.3s;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 15px;
-        box-shadow: 0 0 20px rgba(255, 30, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
-        animation: hell-gradient 4s ease infinite;
-        transition: all 0.2s;
-        text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        margin-top: 10px;
+        clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
       }
 
-      @keyframes hell-gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+      /* Button Hover Power Surge */
+      button[type="submit"]::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: var(--neon-cyan);
+        transition: all 0.4s ease-in-out;
+        z-index: -1;
       }
 
       button[type="submit"]:hover {
-        transform: scale(1.02) translateY(-2px);
-        box-shadow: 0 0 40px var(--hellfire), inset 0 0 20px rgba(255, 255, 255, 0.4);
-        border-color: #fff;
-        letter-spacing: 6px;
+        color: #000;
+        box-shadow: 0 0 30px var(--neon-cyan);
+        text-shadow: none;
       }
 
-      button[type="submit"]:active {
-        transform: scale(0.98);
-        box-shadow: 0 0 10px var(--hellfire);
-      }
+      button[type="submit"]:hover::before { left: 0; }
 
-      /* Magical Slash on Hover */
-      button[type="submit"]::after {
-        content: '';
-        position: absolute;
-        top: -50%; left: -50%;
-        width: 200%; height: 200%;
-        background: linear-gradient(transparent, rgba(255, 255, 255, 0.8), transparent);
-        transform: rotate(45deg) translateY(-100%);
-        transition: transform 0s;
-      }
+      button:disabled { opacity: 0.5; pointer-events: none; }
 
-      button[type="submit"]:hover::after {
-        transform: rotate(45deg) translateY(100%);
-        transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-      }
-
-      button:disabled {
-        filter: grayscale(100%) brightness(0.5);
-        cursor: not-allowed;
-        animation: none;
-        box-shadow: none;
-      }
-
-      /* Shared states */
       .hidden { display: none !important; }
 
-      /* Evil Spinner */
+      /* Tech Spinner */
       .spinner {
-        width: 24px;
-        height: 24px;
-        border: 4px solid transparent;
-        border-top-color: #fff;
-        border-right-color: var(--hellfire);
+        width: 24px; height: 24px;
+        border: 3px solid transparent;
+        border-top-color: #000;
+        border-right-color: #000;
         border-radius: 50%;
-        animation: spin-evil 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        animation: tech-spin 0.8s linear infinite;
       }
 
-      @keyframes spin-evil { to { transform: rotate(360deg) scale(1.2); } }
+      button[type="submit"]:not(:hover) .spinner {
+        border-top-color: var(--neon-cyan);
+        border-right-color: var(--neon-cyan);
+      }
 
-      /* Danger Error */
+      @keyframes tech-spin { 100% { transform: rotate(360deg); } }
+
+      /* Error Alert - Danger Protocol */
       .error {
-        margin-top: 25px;
-        padding: 20px;
-        background: #1a0000;
-        border: 1px solid var(--hellfire);
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
-        border-radius: 4px;
-        color: #ff3333;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 30, 30, 0.1);
+        border-left: 4px solid var(--danger-red);
+        color: var(--danger-red);
+        font-family: var(--font-code);
         font-size: 1rem;
-        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        animation: glitch-anim 0.3s infinite;
       }
 
-      @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
-      }
-
-      /* Magic Portal Success Result */
+      /* Decrypted Data Box (Result) */
       .result {
-        margin-top: 35px;
-        padding: 30px;
-        background: rgba(0, 20, 30, 0.9);
-        border: 2px solid var(--magic-cyan);
-        border-radius: 8px;
+        margin-top: 30px;
+        padding: 25px;
+        background: rgba(0, 243, 255, 0.05);
+        border: 1px solid var(--neon-cyan);
         position: relative;
-        animation: portal-open 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 0 40px rgba(0, 255, 242, 0.3), inset 0 0 20px rgba(0, 255, 242, 0.1);
-        overflow: hidden;
+        animation: data-reveal 0.5s ease-out;
+        clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
       }
 
-      .result::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 242, 0.05) 2px, rgba(0, 255, 242, 0.05) 4px);
-        pointer-events: none;
+      @keyframes data-reveal {
+        from { opacity: 0; transform: translateY(20px) scaleY(0); }
+        to { opacity: 1; transform: translateY(0) scaleY(1); }
       }
 
-      @keyframes portal-open {
-        from { opacity: 0; transform: scale(0.8) translateY(40px); filter: blur(10px); }
-        to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-      }
-
-      .result > p:first-child {
-        color: var(--magic-cyan);
-        font-family: 'JetBrains Mono', monospace;
+      .result p:first-child {
+        color: var(--neon-pink);
+        font-family: var(--font-code);
         font-size: 0.9rem;
+        margin-bottom: 15px;
         text-transform: uppercase;
-        letter-spacing: 4px;
-        margin-bottom: 20px;
-        font-weight: 800;
-        text-shadow: 0 0 10px var(--magic-cyan);
+        letter-spacing: 2px;
       }
 
       .result-row {
         display: flex;
+        justify-content: space-between;
         align-items: center;
         gap: 15px;
-        background: #000;
-        padding: 15px 20px;
-        border-radius: 4px;
-        border: 1px solid #004d49;
-        position: relative;
-        z-index: 2;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 15px;
+        border: 1px dashed rgba(0, 243, 255, 0.4);
       }
 
       #shortUrl {
-        flex: 1;
-        color: #fff;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.3rem;
+        color: var(--neon-cyan);
+        font-family: var(--font-code);
+        font-size: 1.2rem;
         text-decoration: none;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        transition: all 0.3s ease;
-        text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        word-break: break-all;
       }
 
-      #shortUrl:hover {
-        color: var(--toxic-green);
-        text-shadow: 0 0 15px var(--toxic-green);
-      }
+      #shortUrl:hover { text-decoration: underline; text-shadow: 0 0 10px var(--neon-cyan); }
 
       #copyBtn {
-        background: transparent;
-        color: var(--magic-cyan);
-        border: 2px solid var(--magic-cyan);
-        padding: 12px 25px;
-        border-radius: 4px;
-        font-weight: 900;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-family: 'Inter', sans-serif;
+        background: var(--neon-pink);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-family: var(--font-main);
+        font-weight: bold;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        box-shadow: inset 0 0 10px rgba(0, 255, 242, 0.2);
+        cursor: pointer;
+        clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        transition: 0.2s;
       }
 
-      #copyBtn:hover {
-        background: var(--magic-cyan);
-        color: #000;
-        box-shadow: 0 0 20px var(--magic-cyan);
-        transform: scale(1.05);
-      }
+      #copyBtn:hover { background: #fff; color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
 
       .copy-state {
-        color: var(--toxic-green);
-        font-size: 1rem;
-        margin-top: 20px;
+        color: #00ff66;
+        font-family: var(--font-code);
+        margin-top: 15px;
         text-align: right;
-        font-weight: 900;
-        animation: toxic-flash 0.5s ease;
-        font-family: 'JetBrains Mono', monospace;
-        letter-spacing: 3px;
         text-transform: uppercase;
-        text-shadow: 0 0 10px var(--toxic-green);
+        animation: flash-green 0.5s ease;
       }
 
-      @keyframes toxic-flash {
-        0% { opacity: 0; transform: translateX(-20px) scale(1.5); filter: blur(5px); }
-        100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
-      }
+      @keyframes flash-green { 0% { opacity: 0; color: #fff; } 100% { opacity: 1; color: #00ff66; } }
 
-      /* Mobile */
+      /* Mobile Responsive */
       @media (max-width: 600px) {
-        .card { padding: 40px 20px; }
-        h1 { font-size: 2.5rem; }
+        .terminal-core { padding: 25px; }
+        h1 { font-size: 2.2rem; }
         .result-row { flex-direction: column; align-items: stretch; }
-        #copyBtn { width: 100%; margin-top: 10px; }
+        #copyBtn { padding: 15px; margin-top: 10px; }
       }
     </style>
   </head>
   <body>
-    <div class="grid-glow" aria-hidden="true"></div>
-    <main class="container">
-      <section class="card">
-        <p class="brand">DOOMSAGE // LINK</p>
-        <h1>Shorten URLs at warp speed.</h1>
-        <p class="subtitle">Secure, clean, and built for fast sharing.</p>
+    <!-- Fake HUD Data for extreme coolness -->
+    <div class="hud-decor hud-top-left">
+      DOOMSAGE_OS v9.9.4<br>
+      STATUS: ONLINE<br>
+      SECURE_CONN: TRUE
+    </div>
+    <div class="hud-decor hud-bottom-right">
+      TARGET: ACQUIRED<br>
+      MEM_USAGE: 42%<br>
+      SYS_READY
+    </div>
+
+    <main class="terminal-wrapper">
+      <section class="terminal-core">
+        <div class="scanner-line"></div>
+        
+        <div class="sys-header">
+          <div class="brand">DOOMSAGE // TERMINAL</div>
+          <div style="font-family: var(--font-code); color: var(--neon-cyan); font-size: 0.8rem;">[ UPLINK ACTIVE ]</div>
+        </div>
+
+        <h1>Link ko warp speed par short karein</h1>
+        <p class="subtitle">> Secure, fast, aur extreme sharing ke liye ready.</p>
+        <br>
 
         <form id="shortener-form" novalidate>
-          <label for="url">Paste your long URL</label>
-          <input id="url" name="url" type="url" placeholder="https://example.com/very/long/link" required />
+          <div class="input-group">
+            <label for="url">>> Apna long URL yahan paste karein_</label>
+            <input id="url" name="url" type="url" placeholder="https://example.com/very/long/link" required />
+          </div>
 
-          <label for="customCode">Custom code (optional)</label>
-          <input id="customCode" name="customCode" type="text" placeholder="myCode123" maxlength="40" />
+          <div class="input-group">
+            <label for="customCode">>> Custom code (Agar chahiye toh)_</label>
+            <input id="customCode" name="customCode" type="text" placeholder="myCode123" maxlength="40" />
+          </div>
 
           <button id="shortenBtn" type="submit">
-            <span class="btn-label">Shorten</span>
+            <span class="btn-label">SHORTEN KAREIN</span>
             <span class="spinner hidden" aria-hidden="true"></span>
           </button>
         </form>
 
+        <!-- Ye IDs logic ke liye hain, inhe nahi chheda gaya hai -->
         <p id="error" class="error hidden" role="alert"></p>
 
         <article id="result" class="result hidden" aria-live="polite">
-          <p>Short URL ready:</p>
+          <p>[ DATA DECRYPTED: SHORT URL TAIYAR HAI ]</p>
           <div class="result-row">
             <a id="shortUrl" href="#" target="_blank" rel="noopener noreferrer"></a>
-            <button id="copyBtn" type="button">Copy</button>
+            <button id="copyBtn" type="button">COPY KAREIN</button>
           </div>
-          <p id="copyState" class="copy-state hidden">Copied!</p>
+          <p id="copyState" class="copy-state hidden">> Copy Ho Gaya!</p>
         </article>
       </section>
     </main>
 
+    <!-- Aapke scripts exact waise hi hain -->
     <script src="/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/app.js" defer></script>
   </body>
 </html>
-
-
 
 
